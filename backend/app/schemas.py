@@ -1,10 +1,4 @@
-"""
-══════════════════════════════════════════════
-STYLARKX — PYDANTIC SCHEMAS
-══════════════════════════════════════════════
-"""
-
-from pydantic import BaseModel, EmailStr, Field, field_validator
+﻿from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional
 from datetime import datetime
 from enum import Enum
@@ -21,7 +15,7 @@ class ProjectTypeEnum(str, Enum):
 
 
 class ContactStatusEnum(str, Enum):
-    """Contact submission status."""
+    """Legacy contact submission status values."""
     NEW = "new"
     IN_PROGRESS = "in_progress"
     CONTACTED = "contacted"
@@ -29,90 +23,58 @@ class ContactStatusEnum(str, Enum):
     ARCHIVED = "archived"
 
 
-# ══════════════════════════════════════════════
-# REQUEST SCHEMAS
-# ══════════════════════════════════════════════
-
 class ContactFormRequest(BaseModel):
-    """
-    Schema for contact form submission from frontend.
-    """
-    name: str = Field(
-        ...,
-        min_length=2,
-        max_length=255,
-        description="Client's full name"
-    )
-    email: EmailStr = Field(
-        ...,
-        description="Client's email address"
-    )
-    project_type: ProjectTypeEnum = Field(
-        ...,
-        description="Type of project"
-    )
-    message: str = Field(
-        ...,
-        min_length=10,
-        max_length=5000,
-        description="Project details and message"
-    )
-    
-    @field_validator('name')
+    """Schema for contact form submission from frontend."""
+    name: str = Field(..., min_length=2, max_length=255, description="Client's full name")
+    email: EmailStr = Field(..., description="Client's email address")
+    project_type: ProjectTypeEnum = Field(..., description="Type of project")
+    message: str = Field(..., min_length=10, max_length=5000, description="Project details and message")
+
+    @field_validator("name")
     @classmethod
-    def validate_name(cls, v: str) -> str:
-        """Clean and validate name."""
-        v = v.strip()
-        if not v:
-            raise ValueError('Name cannot be empty')
-        return v
-    
-    @field_validator('message')
+    def validate_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Name cannot be empty")
+        return value
+
+    @field_validator("message")
     @classmethod
-    def validate_message(cls, v: str) -> str:
-        """Clean and validate message."""
-        v = v.strip()
-        if len(v) < 10:
-            raise ValueError('Message must be at least 10 characters')
-        return v
-    
+    def validate_message(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) < 10:
+            raise ValueError("Message must be at least 10 characters")
+        return value
+
     class Config:
         json_schema_extra = {
             "example": {
                 "name": "John Doe",
                 "email": "john@example.com",
                 "project_type": "website",
-                "message": "I'm interested in building a custom website for my business."
+                "message": "I'm interested in building a custom website for my business.",
             }
         }
 
 
-# ══════════════════════════════════════════════
-# RESPONSE SCHEMAS
-# ══════════════════════════════════════════════
-
 class ContactFormResponse(BaseModel):
-    """
-    Response after successful contact form submission.
-    """
+    """Response after successful contact form submission."""
     success: bool
     message: str
     submission_id: int
-    
+
     class Config:
         json_schema_extra = {
             "example": {
                 "success": True,
                 "message": "Thank you for your inquiry!",
-                "submission_id": 1
+                "submission_id": 20260322001,
             }
         }
 
 
 class ContactSubmissionDetail(BaseModel):
-    """
-    Detailed contact submission data.
-    """
+    """Legacy schema kept only for compatibility in docs."""
     id: int
     name: str
     email: str
@@ -123,7 +85,7 @@ class ContactSubmissionDetail(BaseModel):
     client_email_sent: bool
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 
