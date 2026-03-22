@@ -1,0 +1,376 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pearl: #F8F7F4;
+  --color-white-alt: #FFFFFF;
+  --color-primary: #0E0E0E;
+  --color-secondary: #6E6E6E;
+  --color-accent: #2F5BFF;
+  --color-gold: #B8860B;
+  --color-gold-light: #DAA520;
+  --color-gold-dark: #8B6508;
+  --color-border: #E8E8E6;
+  --color-border-light: #F0EFEC;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, sans-serif;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MODERN CSS RESET — PROPER ALIGNMENT
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* 1. Box sizing for all elements */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 2. HTML base */
+html {
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+  font-size: 16px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 3. Body base */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-pearl);
+  color: var(--color-primary);
+  line-height: 1.7;
+  font-weight: 400;
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+  width: 100%;
+}
+
+/* 4. Typography reset - specific elements only */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
+  font-weight: inherit;
+}
+
+p {
+  margin: 0;
+  padding: 0;
+}
+
+/* 5. List reset */
+ul, ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* 6. Link reset */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 7. Button reset */
+button {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* 8. Form elements reset */
+input, textarea, select {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* 9. Media reset */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* 10. Blockquote & figure reset */
+blockquote, figure, figcaption {
+  margin: 0;
+  padding: 0;
+}
+
+/* 11. Table reset */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SELECTION & FOCUS STYLES
+   ══════════════════════════════════════════════════════════════════════════ */
+
+::selection {
+  background-color: var(--color-accent);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CONTAINER — PROPER ALIGNMENT
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.container {
+  width: 100%;
+  max-width: 1320px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 60px;
+  padding-right: 60px;
+}
+
+@media (max-width: 1100px) {
+  .container {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+}
+
+@media (max-width: 860px) {
+  .container {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+}
+
+@media (max-width: 540px) {
+  .container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SECTION BASE — PROPER ALIGNMENT
+   ══════════════════════════════════════════════════════════════════════════ */
+
+section {
+  position: relative;
+  width: 100%;
+  margin: 0;
+}
+
+/* Section backgrounds */
+.section-pearl {
+  background: var(--color-pearl);
+}
+
+.section-white {
+  background: var(--color-white-alt);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SCROLL REVEAL ANIMATION
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+.reveal-delay-6 { transition-delay: 0.6s; }
+.reveal-delay-7 { transition-delay: 0.7s; }
+.reveal-delay-8 { transition-delay: 0.8s; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HERO STAGGERED ENTRANCE
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.hero-enter {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.hero-enter.animate {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   UNDERLINE HOVER ANIMATION
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.hover-underline {
+  position: relative;
+}
+
+.hover-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: var(--color-primary);
+  transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hover-underline:hover::after {
+  width: 100%;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SERVICE CARD ACCENT UNDERLINE
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.service-card {
+  position: relative;
+}
+
+.service-card::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--color-gold);
+  transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.service-card:hover::before {
+  width: 100%;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FORM STYLES
+   ══════════════════════════════════════════════════════════════════════════ */
+
+input, textarea, select {
+  font-family: var(--font-sans);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SCROLLBAR
+   ══════════════════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-pearl);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ISSUE 3 FIX: PERFORMANCE — CSS OPTIMIZATIONS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Use will-change sparingly on animated elements */
+.cursor-dot,
+.cursor-ring,
+.cursor-trail {
+  will-change: left, top;
+}
+
+.scroll-progress {
+  will-change: width;
+}
+
+.floating-nav {
+  will-change: transform, opacity;
+}
+
+/* Use transform instead of top/left for animated positions where possible */
+.mesh-orb {
+  will-change: transform;
+}
+
+/* Optimize marquee animation */
+.marquee-track {
+  will-change: transform;
+  transform: translateZ(0); /* Force GPU layer */
+}
+
+/* Pointer events optimization */
+.hero-gradient-mesh,
+.hero-particles,
+.mesh-orb,
+.particle {
+  pointer-events: none;
+}
+
+/* Reduce paint areas with contain — NOT on stat-item to prevent counter visibility issues */
+.service-card,
+.work-item {
+  contain: layout style;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* ISSUE 3 FIX: Disable cursor effects for reduced motion preference */
+  .cursor-dot,
+  .cursor-ring,
+  .cursor-trail {
+    display: none !important;
+  }
+}
