@@ -112,7 +112,7 @@ export function StatsSection() {
       id="stats"
       ref={sectionRef}
       style={{
-        padding: "180px 24px",
+        padding: "clamp(120px, 12vw, 180px) 24px",
         backgroundColor: "#FFFFFF",
         borderTop: "1px solid rgba(14, 14, 14, 0.04)",
         borderBottom: "1px solid rgba(14, 14, 14, 0.04)",
@@ -120,7 +120,7 @@ export function StatsSection() {
       }}
     >
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 text-center">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 xl:gap-12 text-center">
           {stats.map((stat, i) => (
             <div
               key={stat.label}

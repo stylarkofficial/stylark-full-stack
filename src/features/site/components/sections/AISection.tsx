@@ -26,7 +26,7 @@ export function AISection({ fxProfile }: { fxProfile: FxProfile }) {
       id="ai"
       ref={ref}
       className="px-6 md:px-16 lg:px-24"
-      style={{ backgroundColor: "#0E0E0E", paddingTop: "160px", paddingBottom: "160px", position: "relative" }}
+      style={{ backgroundColor: "#0E0E0E", paddingTop: "clamp(112px, 11vw, 160px)", paddingBottom: "clamp(112px, 11vw, 160px)", position: "relative" }}
     >
       {fxProfile.liteFx ? (
         <div className="ai-mobile-waves" />

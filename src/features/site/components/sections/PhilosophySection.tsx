@@ -9,7 +9,7 @@ export function PhilosophySection() {
       id="philosophy"
       ref={ref}
       className="px-6 md:px-16 lg:px-24"
-      style={{ backgroundColor: "#F8F7F4", paddingTop: "200px", paddingBottom: "200px" }}
+      style={{ backgroundColor: "#F8F7F4", paddingTop: "clamp(128px, 13vw, 200px)", paddingBottom: "clamp(128px, 13vw, 200px)" }}
     >
       <div className="max-w-4xl mx-auto text-center">
         {phrases.map((phrase, i) => (

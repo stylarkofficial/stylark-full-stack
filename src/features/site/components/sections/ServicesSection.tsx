@@ -139,7 +139,7 @@ export function ServicesSection() {
       id="services"
       ref={ref}
       className="px-6 md:px-16 lg:px-24"
-      style={{ backgroundColor: "#F8F7F4", paddingTop: "160px", paddingBottom: "160px" }}
+      style={{ backgroundColor: "#F8F7F4", paddingTop: "clamp(112px, 11vw, 160px)", paddingBottom: "clamp(112px, 11vw, 160px)" }}
     >
       <div className="max-w-6xl mx-auto">
         <p className="reveal" style={{

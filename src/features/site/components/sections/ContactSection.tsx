@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useScrollReveal } from "../../../../hooks/useScrollReveal";
 import { getApiBaseUrls } from "../../../../config/api";
 import { useLiquidRippleEffect } from "../../hooks/useLiquidRippleEffect";
@@ -117,7 +117,7 @@ export function ContactSection() {
       id="contact"
       ref={ref}
       className="px-6 md:px-16 lg:px-24"
-      style={{ backgroundColor: "#FFFFFF", paddingTop: "160px", paddingBottom: "160px" }}
+      style={{ backgroundColor: "#FFFFFF", paddingTop: "clamp(112px, 11vw, 160px)", paddingBottom: "clamp(112px, 11vw, 160px)" }}
     >
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
