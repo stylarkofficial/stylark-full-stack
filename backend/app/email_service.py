@@ -1,6 +1,7 @@
 ﻿import asyncio
 import logging
 import smtplib
+import ssl
 from email.message import EmailMessage
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
@@ -38,16 +39,21 @@ def is_email_configured() -> bool:
 
 
 def _deliver_message(message: EmailMessage) -> None:
+    context = ssl.create_default_context()
+
     if settings.MAIL_SSL_TLS:
-        with smtplib.SMTP_SSL(settings.MAIL_SERVER, settings.MAIL_PORT, timeout=30) as server:
+        with smtplib.SMTP_SSL(settings.MAIL_SERVER, settings.MAIL_PORT, timeout=30, context=context) as server:
+            server.ehlo()
             if settings.USE_CREDENTIALS:
                 server.login(settings.MAIL_USERNAME, settings.MAIL_PASSWORD)
             server.send_message(message)
         return
 
     with smtplib.SMTP(settings.MAIL_SERVER, settings.MAIL_PORT, timeout=30) as server:
+        server.ehlo()
         if settings.MAIL_STARTTLS:
-            server.starttls()
+            server.starttls(context=context)
+            server.ehlo()
         if settings.USE_CREDENTIALS:
             server.login(settings.MAIL_USERNAME, settings.MAIL_PASSWORD)
         server.send_message(message)
@@ -142,15 +148,6 @@ async def send_both_emails(
         "company_email": {"sent": False, "error": None, "recipient": settings.COMPANY_EMAIL},
     }
 
-    client_success, client_error = await send_email_to_client(
-        client_name=client_name,
-        client_email=client_email,
-        project_type=project_type,
-        message=message,
-        submission_id=submission_id,
-    )
-    results["client_email"].update({"sent": client_success, "error": client_error})
-
     company_success, company_error = await send_email_to_company(
         client_name=client_name,
         client_email=client_email,
@@ -159,5 +156,14 @@ async def send_both_emails(
         submission_id=submission_id,
     )
     results["company_email"].update({"sent": company_success, "error": company_error})
+
+    client_success, client_error = await send_email_to_client(
+        client_name=client_name,
+        client_email=client_email,
+        project_type=project_type,
+        message=message,
+        submission_id=submission_id,
+    )
+    results["client_email"].update({"sent": client_success, "error": client_error})
 
     return results

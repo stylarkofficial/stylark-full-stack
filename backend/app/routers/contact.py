@@ -1,40 +1,14 @@
-﻿from fastapi import APIRouter, HTTPException, Request, status, BackgroundTasks
+﻿from fastapi import APIRouter, HTTPException, Request, status
 from typing import List, Optional
 import logging
 import time
 
 from ..schemas import ContactFormRequest, ContactFormResponse, ContactSubmissionDetail
-from ..email_service import send_both_emails
+from ..email_service import send_both_emails, is_email_configured
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/contact", tags=["Contact"])
-
-
-async def process_emails_in_background(
-    client_name: str,
-    client_email: str,
-    project_type: str,
-    message: str,
-    submission_id: int,
-) -> None:
-    try:
-        results = await send_both_emails(
-            client_name=client_name,
-            client_email=client_email,
-            project_type=project_type,
-            message=message,
-            submission_id=submission_id,
-        )
-
-        logger.info(
-            "Email task completed for inquiry %s | client=%s | company=%s",
-            submission_id,
-            "sent" if results["client_email"]["sent"] else f"failed ({results['client_email']['error']})",
-            "sent" if results["company_email"]["sent"] else f"failed ({results['company_email']['error']})",
-        )
-    except Exception as exc:
-        logger.error("Email background task error for inquiry %s: %s", submission_id, str(exc))
 
 
 @router.post(
@@ -46,9 +20,14 @@ async def process_emails_in_background(
 async def submit_contact_form(
     contact: ContactFormRequest,
     request: Request,
-    background_tasks: BackgroundTasks,
 ):
     try:
+        if not is_email_configured():
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Email service is not configured on the server.",
+            )
+
         ip_address = request.client.host if request.client else "unknown"
         submission_id = int(time.time() * 1000)
 
@@ -61,8 +40,7 @@ async def submit_contact_form(
             ip_address,
         )
 
-        background_tasks.add_task(
-            process_emails_in_background,
+        results = await send_both_emails(
             client_name=contact.name,
             client_email=contact.email,
             project_type=contact.project_type.value,
@@ -70,11 +48,30 @@ async def submit_contact_form(
             submission_id=submission_id,
         )
 
+        company_sent = results["company_email"]["sent"]
+        client_sent = results["client_email"]["sent"]
+
+        if not company_sent or not client_sent:
+            logger.error(
+                "Inquiry %s email failure | company=%s (%s) | client=%s (%s)",
+                submission_id,
+                company_sent,
+                results["company_email"]["error"],
+                client_sent,
+                results["client_email"]["error"],
+            )
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="We could not send the inquiry emails. Please try again in a moment.",
+            )
+
         return ContactFormResponse(
             success=True,
-            message="Thank you for your inquiry. We've received your message and will get back to you within 24 hours. Please check your email for confirmation.",
+            message="Thank you for your inquiry. We've received your message and sent confirmation to your email.",
             submission_id=submission_id,
         )
+    except HTTPException:
+        raise
     except Exception as exc:
         logger.error("Form submission error: %s", str(exc))
         raise HTTPException(
