@@ -10,7 +10,7 @@
                     "preview":  "vite preview",
                     "typecheck":  "tsc --noEmit",
                     "lint":  "tsc --noEmit --pretty false",
-                    "start:railway":  "vite preview --host 0.0.0.0 --port "
+                    "start:railway":  "vite preview --host 0.0.0.0 --port ${PORT:-4173}"
                 },
     "dependencies":  {
                          "clsx":  "2.1.1",
@@ -30,4 +30,3 @@
                             "vite-plugin-singlefile":  "2.3.0"
                         }
 }
-
