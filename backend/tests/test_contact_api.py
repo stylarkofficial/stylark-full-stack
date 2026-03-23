@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 import sys
 
 from fastapi import FastAPI
@@ -13,10 +13,14 @@ def build_test_client(monkeypatch):
     app = FastAPI()
     app.include_router(contact_router_module.router, prefix="/api/v1")
 
-    async def fake_email_task(*args, **kwargs):
-        return None
+    async def fake_send_both_emails(*args, **kwargs):
+        return {
+            "company_email": {"sent": True, "error": None, "recipient": "stylarkofficial@gmail.com"},
+            "client_email": {"sent": True, "error": None, "recipient": "alice@example.com"},
+        }
 
-    monkeypatch.setattr(contact_router_module, "process_emails_in_background", fake_email_task)
+    monkeypatch.setattr(contact_router_module, "is_email_configured", lambda: True)
+    monkeypatch.setattr(contact_router_module, "send_both_emails", fake_send_both_emails)
     return TestClient(app)
 
 
