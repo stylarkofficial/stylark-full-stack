@@ -1,4 +1,4 @@
-﻿import asyncio
+import asyncio
 import logging
 import smtplib
 import ssl
@@ -42,14 +42,14 @@ def _deliver_message(message: EmailMessage) -> None:
     context = ssl.create_default_context()
 
     if settings.MAIL_SSL_TLS:
-        with smtplib.SMTP_SSL(settings.MAIL_SERVER, settings.MAIL_PORT, timeout=30, context=context) as server:
+        with smtplib.SMTP_SSL(settings.MAIL_SERVER, settings.MAIL_PORT, timeout=12, context=context) as server:
             server.ehlo()
             if settings.USE_CREDENTIALS:
                 server.login(settings.MAIL_USERNAME, settings.MAIL_PASSWORD)
             server.send_message(message)
         return
 
-    with smtplib.SMTP(settings.MAIL_SERVER, settings.MAIL_PORT, timeout=30) as server:
+    with smtplib.SMTP(settings.MAIL_SERVER, settings.MAIL_PORT, timeout=12) as server:
         server.ehlo()
         if settings.MAIL_STARTTLS:
             server.starttls(context=context)
@@ -81,7 +81,7 @@ async def _send_html_email(
     message.add_alternative(html_content, subtype="html")
 
     try:
-        await asyncio.to_thread(_deliver_message, message)
+        await asyncio.wait_for(asyncio.to_thread(_deliver_message, message), timeout=15)
         logger.info("Email sent to %s", recipient)
         return True, None
     except Exception as exc:

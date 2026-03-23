@@ -41,6 +41,9 @@ export function ContactSection() {
 
       for (const apiBaseUrl of apiBaseUrls) {
         try {
+          const controller = new AbortController();
+          const timeoutId = window.setTimeout(() => controller.abort(), 20000);
+
           const response = await fetch(`${apiBaseUrl}/api/v1/contact/submit`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -50,7 +53,10 @@ export function ContactSection() {
               project_type: formState.projectType,
               message: formState.message.trim(),
             }),
+            signal: controller.signal,
           });
+
+          window.clearTimeout(timeoutId);
 
           let data: any = null;
           try {
@@ -67,6 +73,9 @@ export function ContactSection() {
           setFormState({ name: "", email: "", projectType: "", message: "" });
           return;
         } catch (error) {
+          if (error instanceof DOMException && error.name === "AbortError") {
+            throw new Error("The request timed out while contacting the mail server. Please try again.");
+          }
           if (error instanceof TypeError) {
             lastNetworkError = error;
             continue;
@@ -152,7 +161,7 @@ export function ContactSection() {
               color: "#6E6E6E",
             }}>
               Share your vision. We'll assess feasibility, define scope,
-              and architect a path forward â€” with precision.
+              and architect a path forward Ã¢â‚¬â€ with precision.
             </p>
           </div>
 
