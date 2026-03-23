@@ -1,32 +1,17 @@
-﻿from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
-from pathlib import Path
-from jinja2 import Environment, FileSystemLoader
-from typing import Optional, Tuple, Dict, Any
+﻿import asyncio
 import logging
+import smtplib
+from email.message import EmailMessage
+from pathlib import Path
+from typing import Any, Dict, Optional, Tuple
+
+from jinja2 import Environment, FileSystemLoader
 
 from .config import settings
 
 logger = logging.getLogger(__name__)
 
 template_dir = Path(__file__).parent.parent / "templates"
-
-
-def get_email_config() -> ConnectionConfig:
-    return ConnectionConfig(
-        MAIL_USERNAME=settings.MAIL_USERNAME,
-        MAIL_PASSWORD=settings.MAIL_PASSWORD,
-        MAIL_FROM=settings.MAIL_FROM or settings.MAIL_USERNAME,
-        MAIL_PORT=settings.MAIL_PORT,
-        MAIL_SERVER=settings.MAIL_SERVER,
-        MAIL_FROM_NAME=settings.MAIL_FROM_NAME,
-        MAIL_STARTTLS=settings.MAIL_STARTTLS,
-        MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
-        USE_CREDENTIALS=settings.USE_CREDENTIALS,
-        VALIDATE_CERTS=settings.VALIDATE_CERTS,
-        TEMPLATE_FOLDER=template_dir,
-    )
-
-
 jinja_env = Environment(loader=FileSystemLoader(str(template_dir)))
 
 
@@ -43,7 +28,60 @@ def get_project_type_display(project_type: str) -> str:
 
 
 def is_email_configured() -> bool:
-    return bool(settings.MAIL_USERNAME and settings.MAIL_PASSWORD and settings.COMPANY_EMAIL)
+    return bool(
+        settings.MAIL_USERNAME
+        and settings.MAIL_PASSWORD
+        and settings.MAIL_SERVER
+        and settings.MAIL_PORT
+        and settings.COMPANY_EMAIL
+    )
+
+
+def _deliver_message(message: EmailMessage) -> None:
+    if settings.MAIL_SSL_TLS:
+        with smtplib.SMTP_SSL(settings.MAIL_SERVER, settings.MAIL_PORT, timeout=30) as server:
+            if settings.USE_CREDENTIALS:
+                server.login(settings.MAIL_USERNAME, settings.MAIL_PASSWORD)
+            server.send_message(message)
+        return
+
+    with smtplib.SMTP(settings.MAIL_SERVER, settings.MAIL_PORT, timeout=30) as server:
+        if settings.MAIL_STARTTLS:
+            server.starttls()
+        if settings.USE_CREDENTIALS:
+            server.login(settings.MAIL_USERNAME, settings.MAIL_PASSWORD)
+        server.send_message(message)
+
+
+async def _send_html_email(
+    *,
+    subject: str,
+    recipient: str,
+    html_content: str,
+    reply_to: Optional[str] = None,
+) -> Tuple[bool, Optional[str]]:
+    if not is_email_configured():
+        logger.warning("Email not configured - skipping email to %s", recipient)
+        return False, "Email service not configured"
+
+    message = EmailMessage()
+    message["Subject"] = subject
+    message["From"] = f"{settings.MAIL_FROM_NAME} <{settings.MAIL_FROM_ADDRESS}>"
+    message["To"] = recipient
+    if reply_to:
+        message["Reply-To"] = reply_to
+
+    message.set_content("This email contains HTML content. Please open it in an HTML-compatible email client.")
+    message.add_alternative(html_content, subtype="html")
+
+    try:
+        await asyncio.to_thread(_deliver_message, message)
+        logger.info("Email sent to %s", recipient)
+        return True, None
+    except Exception as exc:
+        error_message = str(exc)
+        logger.error("Failed to send email to %s: %s", recipient, error_message)
+        return False, error_message
 
 
 async def send_email_to_client(
@@ -53,33 +91,19 @@ async def send_email_to_client(
     message: str,
     submission_id: int,
 ) -> Tuple[bool, Optional[str]]:
-    if not is_email_configured():
-        logger.warning("Email not configured - skipping client email")
-        return False, "Email service not configured"
+    template = jinja_env.get_template("email_to_client.html")
+    html_content = template.render(
+        name=client_name,
+        project_type=get_project_type_display(project_type),
+        message=message,
+        submission_id=submission_id,
+    )
 
-    try:
-        template = jinja_env.get_template("email_to_client.html")
-        html_content = template.render(
-            name=client_name,
-            project_type=get_project_type_display(project_type),
-            message=message,
-            submission_id=submission_id,
-        )
-
-        message_schema = MessageSchema(
-            subject="Thank You for Contacting StylarkX - We've Received Your Inquiry",
-            recipients=[client_email],
-            body=html_content,
-            subtype=MessageType.html,
-        )
-
-        await FastMail(get_email_config()).send_message(message_schema)
-        logger.info("Client confirmation email sent to %s", client_email)
-        return True, None
-    except Exception as exc:
-        error_message = str(exc)
-        logger.error("Failed to send client email: %s", error_message)
-        return False, error_message
+    return await _send_html_email(
+        subject="Thank You for Contacting StylarkX - We've Received Your Inquiry",
+        recipient=client_email,
+        html_content=html_content,
+    )
 
 
 async def send_email_to_company(
@@ -89,34 +113,21 @@ async def send_email_to_company(
     message: str,
     submission_id: int,
 ) -> Tuple[bool, Optional[str]]:
-    if not is_email_configured():
-        logger.warning("Email not configured - skipping company email")
-        return False, "Email service not configured"
+    template = jinja_env.get_template("email_to_company.html")
+    html_content = template.render(
+        name=client_name,
+        email=client_email,
+        project_type=get_project_type_display(project_type),
+        message=message,
+        submission_id=submission_id,
+    )
 
-    try:
-        template = jinja_env.get_template("email_to_company.html")
-        html_content = template.render(
-            name=client_name,
-            email=client_email,
-            project_type=get_project_type_display(project_type),
-            message=message,
-            submission_id=submission_id,
-        )
-
-        message_schema = MessageSchema(
-            subject=f"New Project Inquiry from {client_name} - StylarkX",
-            recipients=[settings.COMPANY_EMAIL],
-            body=html_content,
-            subtype=MessageType.html,
-        )
-
-        await FastMail(get_email_config()).send_message(message_schema)
-        logger.info("Company notification email sent to %s", settings.COMPANY_EMAIL)
-        return True, None
-    except Exception as exc:
-        error_message = str(exc)
-        logger.error("Failed to send company email: %s", error_message)
-        return False, error_message
+    return await _send_html_email(
+        subject=f"New Project Inquiry from {client_name} - StylarkX",
+        recipient=settings.COMPANY_EMAIL,
+        html_content=html_content,
+        reply_to=client_email,
+    )
 
 
 async def send_both_emails(
