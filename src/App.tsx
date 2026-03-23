@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useActiveSection } from './hooks/useScrollReveal';
 import { WorkSection } from './features/site/components/sections/WorkSection';
 import type { FxProfile } from './features/site/types/fx';
@@ -3027,14 +3027,14 @@ export default function App() {
   return (
     <div>
       <GlobalStyles />
-      {!fxProfile.isMobile && !fxProfile.reduceMotion && <ScrollProgress />}
-      {!fxProfile.isMobile && !fxProfile.isTablet && !fxProfile.liteFx && <MagneticCursor />}
+      {!fxProfile.isMobile && <ScrollProgress />}
+      {!fxProfile.isMobile && !fxProfile.reduceMotion && <MagneticCursor />}
       <Hero fxProfile={fxProfile} />
       <AboutSection />
       <StatsSection />
       <MarqueeTicker />
       <ServicesSection />
-      <WorkSection enableFloatingPreview={!fxProfile.isMobile && !fxProfile.isTablet && !fxProfile.liteFx} />
+      <WorkSection enableFloatingPreview={!fxProfile.isMobile && !fxProfile.reduceMotion} />
       <AISection fxProfile={fxProfile} />
       <PhilosophySection />
       <ContactSection />

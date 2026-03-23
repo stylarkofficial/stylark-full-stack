@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import type { FxProfile } from "../types/fx";
 
 function readFxProfile(): FxProfile {
@@ -15,8 +15,9 @@ function readFxProfile(): FxProfile {
     deviceMemory?: number;
     connection?: { saveData?: boolean };
   };
-  const lowCpu = navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4;
-  const lowRam = typeof nav.deviceMemory === "number" && nav.deviceMemory <= 4;
+
+  const lowCpu = navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 2;
+  const lowRam = typeof nav.deviceMemory === "number" && nav.deviceMemory <= 2;
   const saveData = Boolean(nav.connection?.saveData);
   const isLowPower = lowCpu || lowRam || saveData;
 
@@ -25,7 +26,7 @@ function readFxProfile(): FxProfile {
     isTablet,
     isLowPower,
     reduceMotion,
-    liteFx: reduceMotion || isLowPower || isMobile,
+    liteFx: reduceMotion || isMobile || saveData,
   };
 }
 
