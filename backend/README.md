@@ -1,141 +1,60 @@
-# StylarkX Backend
+﻿# StylarkX Backend
 
-FastAPI backend for StylarkX website with contact form handling and email notifications.
+FastAPI backend for the StylarkX website contact form. The backend is intentionally email-only: it validates contact requests and sends one notification to StylarkX and one confirmation email to the client.
 
-## 🚀 Quick Start
+## Quick Start
 
-### 1. Prerequisites
-
+### Prerequisites
 - Python 3.10+
-- MySQL Server
-- Gmail account (for email notifications)
+- Gmail account with an App Password
 
-### 2. Setup
-
+### Setup
 ```bash
-# Navigate to backend directory
 cd backend
-
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-
-# Install dependencies
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 3. Configure Environment
-
-```bash
-# Copy example env file
-cp .env.example .env
-
-# Edit .env with your credentials
-nano .env
-```
-
-Required settings in `.env`:
-
+### Environment
+Create `backend/.env` with:
 ```env
-# Database
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=your_mysql_password
-DB_NAME=stylarkx_db
-
-# Email (Gmail)
+ENVIRONMENT=development
+PORT=8000
+FRONTEND_URL=http://localhost:5173
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+CORS_ALLOW_ORIGIN_REGEX=^https://.*\.vercel\.app$
 MAIL_USERNAME=your_email@gmail.com
 MAIL_PASSWORD=your_16_char_app_password
 MAIL_FROM=your_email@gmail.com
-
-# Company
+MAIL_PORT=587
+MAIL_SERVER=smtp.gmail.com
+MAIL_FROM_NAME=StylarkX
+MAIL_STARTTLS=true
+MAIL_SSL_TLS=false
+USE_CREDENTIALS=true
+VALIDATE_CERTS=true
 COMPANY_EMAIL=hello@stylarkx.com
 ```
 
-### 4. Setup Database
-
-```bash
-# Login to MySQL
-mysql -u root -p
-
-# Run the SQL script
-source create_database.sql
-```
-
-Or manually:
-```sql
-CREATE DATABASE stylarkx_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-### 5. Run Server
-
+### Run
 ```bash
 python run.py
 ```
 
-Server runs at: http://localhost:8000
+Server: `http://localhost:8000`
+Docs: `http://localhost:8000/docs`
 
-## 📚 API Documentation
+## API Endpoints
+- `GET /`
+- `GET /health`
+- `POST /api/v1/contact/submit`
 
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+## Deployment
+- Railway deploys the backend using the repo-level `railway.json`
+- Vercel deploys the frontend from the repo root
+- No database is required
 
-## 📬 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | API root |
-| GET | `/health` | Health check |
-| POST | `/api/v1/contact/submit` | Submit contact form |
-| GET | `/api/v1/contact/submissions` | Get all submissions |
-| GET | `/api/v1/contact/submissions/{id}` | Get submission by ID |
-
-## 📧 Email Setup (Gmail)
-
-1. Enable 2-Factor Authentication on your Gmail account
-2. Go to: Google Account → Security → App passwords
-3. Generate a new app password for "Mail"
-4. Use this 16-character password in `MAIL_PASSWORD`
-
-## 🏗️ Project Structure
-
-```
-backend/
-├── app/
-│   ├── __init__.py
-│   ├── config.py         # Settings
-│   ├── database.py       # DB connection
-│   ├── models.py         # SQLAlchemy models
-│   ├── schemas.py        # Pydantic schemas
-│   ├── crud.py           # Database operations
-│   ├── email_service.py  # Email handling
-│   ├── main.py           # FastAPI app
-│   └── routers/
-│       ├── __init__.py
-│       └── contact.py    # Contact API
-├── templates/
-│   ├── email_to_company.html
-│   └── email_to_client.html
-├── requirements.txt
-├── .env.example
-├── create_database.sql
-├── run.py
-└── README.md
-```
-
-## 🔧 Development
-
-```bash
-# Run with auto-reload
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-## 📝 License
-
-© 2024 StylarkX. All rights reserved.
+## Notes
+- `submission_id` is a generated inquiry reference, not a stored database row ID
+- `/api/v1/contact/submissions*` endpoints are intentionally disabled

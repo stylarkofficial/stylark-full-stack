@@ -1,4 +1,4 @@
-﻿from pydantic import BaseModel, EmailStr, Field, field_validator
+﻿from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from typing import Optional
 from datetime import datetime
 from enum import Enum
@@ -30,6 +30,17 @@ class ContactFormRequest(BaseModel):
     project_type: ProjectTypeEnum = Field(..., description="Type of project")
     message: str = Field(..., min_length=10, max_length=5000, description="Project details and message")
 
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "name": "John Doe",
+                "email": "john@example.com",
+                "project_type": "website",
+                "message": "I'm interested in building a custom website for my business.",
+            }
+        }
+    )
+
     @field_validator("name")
     @classmethod
     def validate_name(cls, value: str) -> str:
@@ -46,16 +57,6 @@ class ContactFormRequest(BaseModel):
             raise ValueError("Message must be at least 10 characters")
         return value
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "name": "John Doe",
-                "email": "john@example.com",
-                "project_type": "website",
-                "message": "I'm interested in building a custom website for my business.",
-            }
-        }
-
 
 class ContactFormResponse(BaseModel):
     """Response after successful contact form submission."""
@@ -63,14 +64,15 @@ class ContactFormResponse(BaseModel):
     message: str
     submission_id: int
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "success": True,
                 "message": "Thank you for your inquiry!",
                 "submission_id": 20260322001,
             }
         }
+    )
 
 
 class ContactSubmissionDetail(BaseModel):
@@ -86,8 +88,7 @@ class ContactSubmissionDetail(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class HealthCheckResponse(BaseModel):

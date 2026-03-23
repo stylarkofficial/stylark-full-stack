@@ -1,89 +1,54 @@
-# Deployment Guide (Neon + Render + Vercel/GitHub Pages)
+﻿# StylarkX Deployment
 
-This repo is prepared for:
-- Backend: Render (`backend/`)
-- Database: Neon Postgres
-- Frontend: Vercel or GitHub Pages (`/`)
+## Architecture
+- Frontend: Vercel
+- Backend: Railway
+- Contact workflow: email-only
+- Database: not used
 
-## 1) Create Neon Database
+## Railway
+Railway reads the repo-level `railway.json`.
 
-1. Create a Neon project.
-2. Copy the connection string.
-3. Ensure it includes SSL:
-   - `?sslmode=require`
+Required environment variables:
+```env
+ENVIRONMENT=production
+PORT=8000
+FRONTEND_URL=https://YOUR-VERCEL-DOMAIN.vercel.app
+CORS_ORIGINS=https://YOUR-VERCEL-DOMAIN.vercel.app
+CORS_ALLOW_ORIGIN_REGEX=^https://.*\.vercel\.app$
+MAIL_USERNAME=yourgmail@gmail.com
+MAIL_PASSWORD=your-gmail-app-password
+MAIL_FROM=yourgmail@gmail.com
+MAIL_PORT=587
+MAIL_SERVER=smtp.gmail.com
+MAIL_FROM_NAME=StylarkX
+MAIL_STARTTLS=true
+MAIL_SSL_TLS=false
+USE_CREDENTIALS=true
+VALIDATE_CERTS=true
+COMPANY_EMAIL=yourbusinessmail@gmail.com
+```
 
-Example:
-`postgresql://user:password@ep-xxx.region.aws.neon.tech/dbname?sslmode=require`
+Health check:
+- `/health`
 
-## 2) Deploy Backend to Render
+Expected response:
+- `status: healthy`
+- `database: disabled`
+- `email_service: configured`
 
-### Option A: Blueprint (recommended)
-1. Push this repo to GitHub.
-2. In Render, create from Blueprint and select this repo.
-3. Render reads `render.yaml`.
+## Vercel
+Set this environment variable in Vercel:
+```env
+VITE_API_URL=https://YOUR-RAILWAY-URL
+```
 
-### Option B: Manual Web Service
-1. New Web Service -> connect repo.
-2. Root Directory: `backend`
-3. Build Command: `pip install -r requirements.txt`
-4. Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+Framework:
+- Vite
 
-### Required Render Environment Variables
-
-Set these in Render service settings:
-
-- `ENVIRONMENT=production`
-- `DATABASE_URL=<your neon connection string>`
-- `MAIL_USERNAME=stylarkofficial@gmail.com`
-- `MAIL_PASSWORD=<gmail app password>`
-- `MAIL_FROM=stylarkofficial@gmail.com`
-- `COMPANY_EMAIL=<where inquiry notifications go>`
-- `FRONTEND_URL=<your frontend URL>`
-- `CORS_ORIGINS=<comma-separated exact origins>`
-- `CORS_ALLOW_ORIGIN_REGEX=^https://.*\\.vercel\\.app$` (optional; good for Vercel previews)
-
-After deployment, verify:
-- `https://<render-service>.onrender.com/health`
-
-## 3) Deploy Frontend to Vercel
-
-1. Import repo into Vercel.
-2. Framework preset: Vite.
-3. Set Project Environment Variables:
-   - `VITE_API_URL=https://<render-service>.onrender.com`
-   - `VITE_BASE_PATH=/`
-4. Deploy.
-
-## 4) Deploy Frontend to GitHub Pages (alternative)
-
-Workflow file is included:
-- `.github/workflows/deploy-gh-pages.yml`
-
-GitHub repo setup:
-1. Go to `Settings -> Pages`.
-2. Source: `GitHub Actions`.
-3. Add repo secret:
-   - `VITE_API_URL=https://<render-service>.onrender.com`
-4. Push to `main` to trigger deploy.
-
-The workflow automatically sets:
-- `VITE_BASE_PATH=/<repo-name>/`
-
-## 5) Post-Deployment Checks
-
-1. Frontend loads successfully.
-2. Contact form submit returns success.
-3. Render logs show submission created.
-4. Gmail sends:
-   - confirmation email to client
-   - notification email to company address
-5. `/health` returns:
-   - `status: healthy`
-   - `database: healthy`
-   - `email_service: configured`
-
-## Notes
-
-- Backend supports `DATABASE_URL` (Neon/Postgres) and legacy MySQL fallback.
-- For production, always use `DATABASE_URL`.
-- Keep all secrets in platform env vars, not committed files.
+## Verification
+1. Load the frontend
+2. Submit the contact form
+3. Confirm the success message appears
+4. Confirm company notification email arrives
+5. Confirm client acknowledgement email arrives

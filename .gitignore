@@ -7,6 +7,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 pytest-cache-files-*/
+*.log
 .env
 backend/.env
 .DS_Store
