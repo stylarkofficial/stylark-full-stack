@@ -38,7 +38,7 @@ export function Footer() {
           color: "#AAAAAA",
           letterSpacing: "0.05em",
         }}>
-          © 2026 StylarkX
+          Â© 2026 StylarkX
         </p>
       </div>
     </footer>
