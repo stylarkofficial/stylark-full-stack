@@ -6,11 +6,26 @@ type WorkSectionProps = {
   enableFloatingPreview: boolean;
 };
 
+function getPreviewSize(project: (typeof projects)[number] | null) {
+  if (!project?.previewWidth || !project.previewHeight) {
+    return { width: 520, height: 320, aspectRatio: "16 / 10" };
+  }
+
+  const ratio = project.previewWidth / project.previewHeight;
+  const width = ratio >= 1.95 ? 560 : 520;
+  return {
+    width,
+    height: Math.round(width / ratio),
+    aspectRatio: `${project.previewWidth} / ${project.previewHeight}`,
+  };
+}
+
 export function WorkSection({ enableFloatingPreview }: WorkSectionProps) {
   const ref = useScrollReveal();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const hoveredProject = hoveredIndex !== null ? projects[hoveredIndex] : null;
+  const previewSize = getPreviewSize(hoveredProject);
 
   useEffect(() => {
     if (!enableFloatingPreview) return;
@@ -31,9 +46,10 @@ export function WorkSection({ enableFloatingPreview }: WorkSectionProps) {
       currentY += (targetY - currentY) * 0.1;
 
       if (hoveredIndex !== null && previewRef.current) {
-        const offsetX = window.innerWidth / 2 > targetX ? 40 : -390;
+        const rect = previewRef.current.getBoundingClientRect();
+        const offsetX = window.innerWidth / 2 > targetX ? 40 : -(rect.width + 40);
         previewRef.current.style.left = `${currentX + offsetX}px`;
-        previewRef.current.style.top = `${currentY - 225}px`;
+        previewRef.current.style.top = `${currentY - rect.height / 2}px`;
 
         const deltaX = targetX - currentX;
         const rotation = deltaX * 0.02;
@@ -252,9 +268,9 @@ export function WorkSection({ enableFloatingPreview }: WorkSectionProps) {
           className={`work-image-reveal ${hoveredProject ? "visible" : ""}`}
           style={{
             background: hoveredProject?.color || "#1a1a2e",
-            width: "520px",
-            height: "320px",
-            aspectRatio: "16/10",
+            width: `${previewSize.width}px`,
+            height: `${previewSize.height}px`,
+            aspectRatio: previewSize.aspectRatio,
             borderRadius: "18px",
           }}
         >
@@ -278,5 +294,3 @@ export function WorkSection({ enableFloatingPreview }: WorkSectionProps) {
     </section>
   );
 }
-
-
