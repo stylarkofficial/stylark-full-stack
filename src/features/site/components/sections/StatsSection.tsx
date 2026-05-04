@@ -1,21 +1,25 @@
 import { useEffect, useRef, useState } from "react";
+import { projects } from "../../data/projects";
+
+const stats = [
+  { target: projects.length, suffix: "", label: "Portfolio Projects" },
+  { target: projects.filter((project) => project.url).length, suffix: "", label: "Live Website Links" },
+  { target: 100, suffix: "%", label: "Custom-Built Delivery" },
+  { target: 3, suffix: "D", label: "Interactive Web Capability" },
+];
+
+const initialStatFlags = () => stats.map(() => false);
+const initialCounts = () => stats.map(() => 0);
 
 export function StatsSection() {
-  const [counts, setCounts] = useState<number[]>([0, 0, 0, 0]);
+  const [counts, setCounts] = useState<number[]>(initialCounts);
   const hasAnimatedRef = useRef(false);
   const rafIdsRef = useRef<number[]>([]);
   const timeoutIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [isStatsVisible, setIsStatsVisible] = useState(false);
-  const [completedStats, setCompletedStats] = useState([false, false, false, false]);
-  const [countingStats, setCountingStats] = useState([false, false, false, false]);
+  const [completedStats, setCompletedStats] = useState(initialStatFlags);
+  const [countingStats, setCountingStats] = useState(initialStatFlags);
   const sectionRef = useRef<HTMLElement>(null);
-
-  const stats = [
-    { target: 4, suffix: "", label: "Products Launched" },
-    { target: 1, suffix: "", label: "AI/ML Website In Progress" },
-    { target: 100, suffix: "%", label: "Custom-Built Delivery" },
-    { target: 3, suffix: "D", label: "Interactive Web Capability" },
-  ];
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -84,8 +88,8 @@ export function StatsSection() {
 
             const finalizeTimeout = setTimeout(() => {
               setCounts(stats.map((s) => s.target));
-              setCountingStats([false, false, false, false]);
-              setCompletedStats([true, true, true, true]);
+              setCountingStats(initialStatFlags());
+              setCompletedStats(stats.map(() => true));
             }, 4200);
             timeoutIdsRef.current.push(finalizeTimeout);
 
