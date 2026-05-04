@@ -12,3 +12,4 @@ pytest-cache-files-*/
 backend/.env
 .DS_Store
 Thumbs.db
+.vercel
